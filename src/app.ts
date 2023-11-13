@@ -10,7 +10,7 @@ interface Person {
 }
 
 // Defining const Pronouns for crossing checkings.
-const Pronouns: Person = {
+const PROUNOUNS: Person = {
     firstPersonSingular: ["I", "me", "my", "mine", "myself"],
     firstPersonPlural: ["we", "us", "our", "ours", "ourshelves"],
     secondPersonSingular: ["you", "your", "yourself"]
@@ -40,8 +40,8 @@ const categorizingWordsIntoObject = async (words:stringArr)=>{
         }
 
         //ii. Check for all possible pronouns
-        for (const key in Pronouns) {
-            const Pronouns_Array:stringArr = Pronouns[key];
+        for (const key in PROUNOUNS) {
+            const Pronouns_Array:stringArr = PROUNOUNS[key];
             if (Pronouns_Array.includes( word.toLowerCase()) ){
                 return_Object[key].push(word);
                 pushed = true;
@@ -90,7 +90,7 @@ const checkPronouns = async (termsToCheckObj:Person, sentenceToCheckObj:Person)=
     let returnArr:stringArr = [];
 
     // Loop through keys of const Pronouns:firstPersonSingular, firstPersonPlural, secondPersonSingular
-    for (const pronoun in Pronouns) { 
+    for (const pronoun in PROUNOUNS) { 
         // Since all pronouns in the sentence have been checked and categorized, 
         // just push the whole string array as result when specific pronoun check is neccessary
         if (termsToCheckObj[pronoun].length > 0 ) {
