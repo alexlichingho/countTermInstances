@@ -5,8 +5,11 @@ interface Person {
 	firstPersonSingular: stringArr;
 	firstPersonPlural: stringArr;
 	secondPersonSingular: stringArr;
-    otherTerms?: stringArr; //Optional 
     [key: string]: any;
+}
+
+interface CheckObject extends Person {
+    otherTerms?: stringArr; //Optional 
 }
 
 // Defining const Pronouns for crossing checkings.
@@ -23,7 +26,7 @@ const cleanAndSplitString = async (str:string)=>{
 
 const categorizingWordsIntoObject = async (words:stringArr)=>{
     
-    let return_Object: Person = {
+    let return_Object: CheckObject = {
         firstPersonSingular:[],
         firstPersonPlural:[],
         secondPersonSingular:[],
@@ -85,7 +88,7 @@ const checkOtherTerms = async (otherTerms:stringArr, sentence:stringArr)=>{
     return returnArr;
 };
 
-const checkPronouns = async (termsToCheckObj:Person, sentenceToCheckObj:Person)=>{
+const checkPronouns = async (termsToCheckObj:CheckObject, sentenceToCheckObj:CheckObject)=>{
 
     let returnArr:stringArr = [];
 
@@ -103,8 +106,8 @@ const checkPronouns = async (termsToCheckObj:Person, sentenceToCheckObj:Person)=
 
 const countTermInstances = async (Sentence:string, Terms:string)=>{
     
-    const Sentence_Obj:Person = await toPersonObj( Sentence ); // Turn Sentences into an categorized Object
-    const Terms_Obj:Person= await toPersonObj( Terms ); // Turn Terms into an categorized Object
+    const Sentence_Obj:CheckObject = await toPersonObj( Sentence ); // Turn Sentences into an categorized Object
+    const Terms_Obj:CheckObject= await toPersonObj( Terms ); // Turn Terms into an categorized Object
 
     // Returning a flattened String Array after cross checkings Pronouns and other terms
     return [
