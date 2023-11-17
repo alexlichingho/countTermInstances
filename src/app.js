@@ -25,7 +25,17 @@ const removeDuplicates = (arr) => {
     return [...new Set(arr)];
 };
 const cleanAndSplitString = (str) => __awaiter(void 0, void 0, void 0, function* () {
-    return str.replace(/[\p{P}$+<=>^`|~]/gu, '').split(/\b\W+\b/).filter(word => word.length > 0);
+    const strArr = str.split(/\b\W+\b/);
+    let returnArr = strArr.map(w => {
+        if (w.length == 0 && w === 'I') {
+            return w;
+        }
+        else {
+            return w.replace(/^[^\w\s]+|[^\w\s]+$/g, "");
+        }
+    });
+    console.log(`returnArr = ${returnArr}`);
+    return returnArr;
 });
 const categorizingWordsIntoObject = (words) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -91,36 +101,16 @@ const checkOtherTerms = (otherTerms, sentence) => {
     ;
     return returnArr;
 };
-const checkPronouns = (termsToCheckObj, sentenceToCheckObj, iterator) => {
-    console.log(`checkPronouns, iterator = ${iterator}`);
+const checkPronouns = (termsToCheckObj, sentenceToCheckObj, key) => {
     let returnArr = [];
-    // Loop through keys of const Pronouns:firstPersonSingular, firstPersonPlural, secondPersonSingular
-    // for (const pronoun in PROUNOUNS) { 
-    //     // Since all pronouns in the sentence have been checked and categorized, 
-    //     // just push the whole string array as result when specific pronoun check is neccessary
-    //     if (termsToCheckObj[pronoun].length > 0 ) {
-    //         returnArr.push(sentenceToCheckObj[pronoun])
-    //     }    
-    // };
-    for (const element of sentenceToCheckObj[iterator]) {
-        returnArr.push(element);
-    }
+    returnArr.push(sentenceToCheckObj[key]);
     return returnArr;
 };
 const countTermInstances = (Sentence, Terms) => __awaiter(void 0, void 0, void 0, function* () {
     const Sentence_Obj = yield toPersonObj(Sentence); // Turn Sentences into an categorized Object
     const Terms_Obj = yield toPersonObj(Terms); // Turn Terms into an categorized Object
-    // Returning a flattened String Array after cross checkings Pronouns and other terms
-    // return [
-    //         ...await checkOtherTerms(Terms_Obj.otherTerms, Sentence_Obj.otherTerms),
-    //         ...await checkPronouns(Terms_Obj, Sentence_Obj)
-    // ]
-    // .flat();
-    console.log(`Sentence_Obj = ${JSON.stringify(Sentence_Obj)}`);
-    console.log(`Terms_Obj = ${JSON.stringify(Terms_Obj)}`);
     let returnArr = [];
     for (const iterator of Terms_Obj.sequence) {
-        console.log(`iterator = ${iterator}`);
         if (iterator == 'otherTerms') {
             returnArr.push(checkOtherTerms(Terms_Obj.otherTerms, Sentence_Obj.otherTerms));
         }
@@ -135,7 +125,7 @@ const countTermInstances = (Sentence, Terms) => __awaiter(void 0, void 0, void 0
     try {
         // const Sentence:string = `The Customer is always right`
         // const Terms:string = `Customer, you`;
-        const Sentence = `i. The Customer is always right, ii. you are always wrong, iii. we should make ourshelves happy`;
+        const Sentence = `i. The Customer is always right, ii. you are always wrong, iii. we should make ourshelves happy. I am happy for you!`;
         const Terms = `you, Customer, we, us`;
         console.log(`
         The Sentence to be check is: 
@@ -147,8 +137,8 @@ const countTermInstances = (Sentence, Terms) => __awaiter(void 0, void 0, void 0
         Please edit them by changing the const: Sentence or const:Terms
         `);
         let List_of_terms = yield countTermInstances(Sentence, Terms);
-        List_of_terms = List_of_terms.flat();
-        console.log(List_of_terms);
+        List_of_terms = List_of_terms.flat(2);
+        console.log(List_of_terms); //result
     }
     catch (e) {
         // Deal with the fact the chain failed

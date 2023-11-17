@@ -32,7 +32,22 @@ const removeDuplicates = (arr:any)=> {
 } 
 
 const cleanAndSplitString = async (str:string)=>{
-    return str.replace(/[\p{P}$+<=>^`|~]/gu, '').split(/\b\W+\b/).filter(word => word.length > 0);
+
+    const strArr = str.split(/\b\W+\b/);
+    
+    let returnArr = strArr.map( w => {
+        if (w.length==0 && w==='I') {
+            return w;
+        }
+        else{
+           return  w.replace(/^[^\w\s]+|[^\w\s]+$/g, "")
+           
+        }
+    })
+
+    console.log(`returnArr = ${returnArr}`);
+    return returnArr;
+    
 }
 
 const categorizingWordsIntoObject = async (words:stringArr)=>{
@@ -147,7 +162,7 @@ const countTermInstances = async (Sentence:string, Terms:string)=>{
         // const Sentence:string = `The Customer is always right`
         // const Terms:string = `Customer, you`;
 
-        const Sentence:string = `i. The Customer is always right, ii. you are always wrong, iii. we should make ourshelves happy`
+        const Sentence:string = `i. The Customer is always right, ii. you are always wrong, iii. we should make ourshelves happy. I am happy for you!`
         const Terms:string = `you, Customer, we, us`;
 
         console.log(`
