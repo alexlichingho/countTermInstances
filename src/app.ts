@@ -19,38 +19,29 @@ const PROUNOUNS: Person = {
     secondPersonSingular: ["you", "your", "yourself"]
 };
 
-enum CheckObjectSequence {
-    firstPersonSingular, 
-    firstPersonPlural, 
-    secondPersonSingular, 
-    otherTerms,
-}
-
-
 const removeDuplicates = (arr:any)=> { 
     return [...new Set(arr)]; 
 } 
 
-const cleanAndSplitString = async (str:string)=>{
+const cleanAndSplitString = async (str:string, category:string)=>{
 
-    const strArr = str.split(/\b\W+\b/);
-    
-    let returnArr = strArr.map( w => {
-        if (w.length==0 && w==='I') {
-            return w;
-        }
-        else{
-           return  w.replace(/^[^\w\s]+|[^\w\s]+$/g, "")
-           
-        }
-    })
-
-    console.log(`returnArr = ${returnArr}`);
+    let returnArr:stringArr = [];
+    // for terms, split into array by ',' and trim all whitespaces
+    if (category=='terms') {
+        returnArr =  str.split(',').map( (word) => {
+            return word.trim(); 
+        });
+    }
+    //for sentence, split into array by space, removing all leading and trailing punctuations
+    else if (category =='sentence'){
+        returnArr =  str.split(' ').map( (word) => {
+            return word.replace(/^[^\w]+|[^\w]+$/g, '');
+        })
+    }
     return returnArr;
-    
 }
 
-const categorizingWordsIntoObject = async (words:stringArr)=>{
+const categorizingWordsIntoObject = async (words:stringArr, category:string)=>{
     
     let return_Object: CheckObject = {
         firstPersonSingular:[],
@@ -60,34 +51,39 @@ const categorizingWordsIntoObject = async (words:stringArr)=>{
         sequence:[]
     };
 
-    let sequenceArray:number[] = [];
-
     for (const word of words) {
         let pushed:boolean = false;
         let sequenceKey:string = 'otherTerms'
-        //i. Check if possible Capital I in the Sentence
-        if (word ===`I`) {
+
+        //i. Check if possible "I"in Sentence
+        if (word ===`I` && category=='sentence') {
             return_Object['firstPersonSingular'].push(word)
             pushed = true;
             sequenceKey = 'firstPersonSingular'
         }
 
-        //ii. Check for all possible pronouns
+        //ii. Check if possible "I" or "i" in Terms
+        if ( (word==='i' || word ==='I') && category=='terms') {
+            return_Object['firstPersonSingular'].push(word)
+            pushed = true;
+            sequenceKey = 'firstPersonSingular'
+        }
+
+        //iii. Check for all possible pronouns
         for (const key in PROUNOUNS) {
             const Pronouns_Array:stringArr = PROUNOUNS[key];
             if (Pronouns_Array.includes( word.toLowerCase()) ){
                 return_Object[key].push(word);
                 pushed = true;
-                sequenceKey = key;
+                sequenceKey = key; //breaking the inner for-of loop
                 break;
             }
         }
 
-        //iii. The rest will be words for non-pronouns checking
+        //iv. The rest will be words for non-pronouns checking
         if (!pushed) {
             return_Object["otherTerms"]?.push(word)
             pushed = true;
-            sequenceKey = 'otherTerms';
         };
 
         return_Object['sequence'].push(sequenceKey)
@@ -95,27 +91,24 @@ const categorizingWordsIntoObject = async (words:stringArr)=>{
 
     return_Object['sequence'] = removeDuplicates( return_Object['sequence'] );
 
-    console.log(return_Object['sequence']);
-    
-    
     return return_Object;
 };
 
-const toPersonObj = async (str:string)=>{
+const toPersonObj = async (str:string, category:string)=>{
 
-    //1. Split and clean up input sentence into an string array  
-    const Words:stringArr = await cleanAndSplitString(str)
+    // 1. Split and clean up input sentence into an string array, according to category
+    const Words:stringArr = await cleanAndSplitString(str, category)
     
     //2. Returning an Object with interface Person 
-    return categorizingWordsIntoObject(Words);
+    return categorizingWordsIntoObject(Words, category);
 }
 
 const checkOtherTerms = (otherTerms:stringArr, sentence:stringArr)=>{
-    console.log(`checkOtherTerms`);
     
     let returnArr:stringArr = [];
 
-    if (otherTerms.length > 0) { // Ensure checking will start only if neccessary
+    // Ensure checking will start only if neccessary
+    if (otherTerms.length > 0) { 
         for (const TermToCheck of otherTerms) {
             for (const otherTerm of sentence) {
                 if (otherTerm.toLowerCase() === TermToCheck.toLowerCase() ) { // Transform into lowercase only during checking
@@ -128,42 +121,47 @@ const checkOtherTerms = (otherTerms:stringArr, sentence:stringArr)=>{
     return returnArr;
 };
 
-const checkPronouns = (termsToCheckObj:CheckObject, sentenceToCheckObj:CheckObject, key:string)=>{
+const checkPronouns = ( sentenceToCheckObj:CheckObject, category:string)=>{
     
     let returnArr:stringArr = [];
 
-    returnArr.push(sentenceToCheckObj[key])
-    return returnArr;
+    if (category === 'firstPersonSingular') {
+        for (const iterator of sentenceToCheckObj[category]) {
+            returnArr.push(iterator)
+        }
+    }
+    else{
+        returnArr = sentenceToCheckObj[category]
+    };
+
+    return returnArr
 }
 
 const countTermInstances = async (Sentence:string, Terms:string)=>{
     
-    const Sentence_Obj:CheckObject = await toPersonObj( Sentence ); // Turn Sentences into an categorized Object
-    const Terms_Obj:CheckObject= await toPersonObj( Terms ); // Turn Terms into an categorized Object
+    // Turn Sentences into an categorized Object
+    const Sentence_Obj:CheckObject = await toPersonObj( Sentence, 'sentence' ); 
+
+    // Turn Terms into an categorized Object
+    const Terms_Obj:CheckObject= await toPersonObj( Terms, 'terms' ); 
 
     let returnArr:any = [];
-    for (const iterator of Terms_Obj.sequence) {
-        if (iterator == 'otherTerms') {
+    for (const category of Terms_Obj.sequence) {
+        if (category == 'otherTerms') {
             returnArr.push( checkOtherTerms(Terms_Obj.otherTerms, Sentence_Obj.otherTerms) ) 
         }
         else{
-           returnArr.push( checkPronouns(Terms_Obj, Sentence_Obj, iterator) );
+           returnArr.push( checkPronouns(Sentence_Obj, category) );
         }
     }
 
-    returnArr = removeDuplicates( returnArr );
-
-    return returnArr;
-
+    return removeDuplicates( returnArr );
 }
 
 (async () => {
     try {
-        // const Sentence:string = `The Customer is always right`
-        // const Terms:string = `Customer, you`;
-
         const Sentence:string = `i. The Customer is always right, ii. you are always wrong, iii. we should make ourshelves happy. I am happy for you!`
-        const Terms:string = `you, Customer, we, us`;
+        const Terms:string = `you, Customer, we, i`;
 
         console.log(`
         The Sentence to be check is: 

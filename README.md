@@ -16,7 +16,7 @@ Description:
 
 1. Created an object named "PROUNOUNS" with interface "Person", which stores and categrorized all the pronouns: firstPersonSingular, firstPersonPlural, secondPersonSingular
 
-2. Clean up sentence/ terms by removing all punctuations and splited by whitespace into text array.
+2. Clean up sentence seperately according to the category by removing all punctuations and splited by whitespace into text array.
 
 3. Each words in the text array to be checked with "PROUNOUNS" and put into an Object which has 4 categories: firstPersonSingular, firstPersonPlural, secondPersonSingular + otherTerms. Pronouns will be be corresponding pronoun category, the rest of the words will be put into the "otherTerms" category.
 
@@ -28,6 +28,6 @@ Now there are 2 objects: "Sentence_Obj" & "Terms_Obj", we will be cross checking
 
 5. Check the non-pronons words using an async function checkOtherTerms(). Only text arrays from "Sentence_Obj" and "Terms_Obj" will be used. Return result in text array into "List_of_terms".
 
-6. Check the pronons words using an async function checkPronouns(). By looping through the keys of object "PROUNOUNS": firstPersonSingular, firstPersonPlural, secondPersonSingular, if there is any element exists in the array of "Terms_Obj[key]", the text array of "Sentence_Obj[key]" will be pushed into "List_of_terms".
+6. Check the pronons words using an async function checkPronouns(). By looping through the keys of object "PROUNOUNS": firstPersonSingular, firstPersonPlural, secondPersonSingular, if there is any element exists in the array of "Terms_Obj[category]", the text array of "Sentence_Obj[category]" will be pushed into "List_of_terms".
 
 7. Flatten "List_of_terms" and output.
